@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Frans oefenen" />
+  <meta name="theme-color" content="#1f6feb" />
+  <title>Frans oefenen</title>
+  <style>
+    :root { --bg:#f6f8fb; --card:#fff; --text:#17202a; --muted:#667085; --primary:#1f6feb; --ok:#178a45; --bad:#c0392b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background:var(--bg); color:var(--text); }
+    .app { min-height:100dvh; padding: max(18px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)); display:flex; align-items:center; justify-content:center; }
+    .card { width:100%; max-width:520px; background:var(--card); border-radius:28px; padding:22px; box-shadow:0 14px 40px rgba(20,30,50,.12); }
+    h1 { font-size:28px; margin:0 0 8px; }
+    h2 { font-size:18px; margin:0 0 14px; color:var(--muted); font-weight:600; }
+    .screen { display:none; } .screen.active { display:block; }
+    button { width:100%; border:0; border-radius:18px; padding:16px 18px; margin:8px 0; font-size:18px; font-weight:700; cursor:pointer; touch-action:manipulation; }
+    .primary { background:var(--primary); color:white; } .secondary { background:#eef4ff; color:#184e9e; } .good { background:#e8f7ee; color:var(--ok); } .wrong { background:#fdeceb; color:var(--bad); }
+    .small { font-size:15px; padding:12px; border-radius:14px; }
+    .word { font-size:34px; line-height:1.15; text-align:center; font-weight:800; margin:26px 0; word-break:break-word; }
+    .answer { display:none; font-size:28px; line-height:1.2; text-align:center; font-weight:800; margin:20px 0; color:var(--primary); }
+    .meta { display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-weight:700; margin-bottom:12px; }
+    .bar { height:10px; background:#e5eaf2; border-radius:99px; overflow:hidden; margin-bottom:16px; }
+    .fill { height:100%; width:0%; background:var(--primary); transition:.2s; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .list { max-height:250px; overflow:auto; background:#f8fafc; border-radius:18px; padding:12px; margin:12px 0; }
+    .item { padding:10px 6px; border-bottom:1px solid #e8edf5; font-size:15px; } .item:last-child{border-bottom:0}
+    .muted { color:var(--muted); }
+  </style>
+</head>
+<body>
+<div class="app"><main class="card">
+  <section id="start" class="screen active">
+    <h1>Frans oefenen</h1><h2>Kies hoe je wil oefenen</h2>
+    <button class="primary" onclick="startQuiz('fr-nl', words)">Frans → Nederlands</button>
+    <button class="secondary" onclick="startQuiz('nl-fr', words)">Nederlands → Frans</button>
+    <p class="muted">Tip: voeg deze pagina op iPhone toe aan je beginscherm via Delen → Zet op beginscherm.</p>
+  </section>
+
+  <section id="quiz" class="screen">
+    <div class="meta"><span id="count"></span><span id="score"></span></div>
+    <div class="bar"><div id="fill" class="fill"></div></div>
+    <div class="muted" style="text-align:center">Vertaal:</div>
+    <div id="question" class="word"></div>
+    <div id="answer" class="answer"></div>
+    <button id="showBtn" class="primary" onclick="showAnswer()">Toon antwoord</button>
+    <div id="judge" class="row" style="display:none">
+      <button class="good" onclick="mark(true)">Juist</button>
+      <button class="wrong" onclick="mark(false)">Fout</button>
+    </div>
+    <button class="secondary small" onclick="goStart()">Stoppen</button>
+  </section>
+
+  <section id="end" class="screen">
+    <h1>Klaar!</h1><h2 id="result"></h2>
+    <div id="wrongBox"></div>
+    <button id="retryWrong" class="primary" onclick="startQuiz(direction, wrongWords)">Foute woorden oefenen</button>
+    <button class="secondary" onclick="startQuiz(direction, words)">Alles opnieuw</button>
+    <button class="secondary" onclick="goStart()">Andere richting kiezen</button>
+  </section>
+</main></div>
+
+<script>
+const words = [
+["un agent de police","een politieagent"],["agréable","aangenaam"],["appeler","(op)bellen"],["apprendre","(aan)leren"],["un après-midi","een namiddag"],["un arbre","een boom"],["l’argent de poche","het zakgeld"],["arriver","aankomen"],["assez","genoeg"],["une assiette","een bord"],["un bain","een bad"],["un ballon","een bal"],["un bateau","een boot"],["un bébé","een baby"],["un bonnet","een (bad)muts"],["un bras","een arm"],["une caisse","een kassa"],["un camion","een vrachtwagen"],["un carrefour","een kruispunt"],["un chèque-cadeau","een geschenkbon"],["un coin","een hoek"],["courir","lopen"],["un cours","een les"],["un crayon","een potlood"],["une crêpe","een pannenkoek"],["décorer","versieren"],["devoir","moeten"],["donner","geven"],["dormir","slapen"],["la douleur","de pijn"],["un(e) élève","een leerling(e)"],["en face de","tegenover"],["fatigué(e)","moe"],["une fin","een einde"],["entre","tussen"],
+["envoyer","(op)sturen"],["essayer","proberen"],["un exemple","een voorbeeld"],["une ferme","een boerderij"],["une fête","een feest"],["une feuille","een blad"],["finir","(be)eindigen"],["une forêt","een bos, een woud"],["un genou","een knie"],["une glace","een ijsje"],["une guirlande","een slinger"],["une guitare","een gitaar"],["un hôpital","een ziekenhuis"],["un immeuble","een flatgebouw"],["une jupe","een rok"],["un lit","een bed"],["un magazine","een tijdschrift"],["une main","een hand"],["un médicament","een geneesmiddel"],["même","zelfs"],["mettre","dekken, plaatsen, zetten"],["un mouton","een schaap"],["un œuf","een ei"],["ouvrir","openen"],["une page","een bladzijde"],["un pantalon","een broek"],["penser à","denken aan"],["peut-être","misschien"],["une phrase","een zin"],["un piano","een piano"],["une plage","een strand"],["plier","plooien"],["une pomme de terre","een aardappel"],["un pont","een brug"],["une poule","een kip"],["un prénom","een voornaam"],["quelque part","ergens"],["quelques","enkele, enige"],["raconter","vertellen"],
+["un repas","een maaltijd"],["un restaurant","een restaurant"],["un sapin de Noël","een kerstboom"],["une sauce","een saus"],["sauter","springen"],["se laver","zich wassen"],["se lever","opstaan"],["se promener","wandelen"],["soigner","verzorgen"],["les soldes","de uitverkoop"],["une sortie","een uitgang"],["souvent","vaak"],["un tableau","een (school)bord"],["la terre","de grond"],["un toboggan","een glijbaan"],["tomber","vallen"],["toujours","altijd"],["tout de suite","onmiddellijk"],["un tram","een tram"],["travailler","werken"],["une vache","een koe"],["la vaisselle","de afwas"],["une valise","een koffer"],["vendre","verkopen"],["un vêtement","een kledingstuk"],["un violon","een viool"]
+];
+let quiz=[], index=0, correct=0, wrongWords=[], direction='fr-nl';
+function shuffle(a){ return [...a].sort(()=>Math.random()-0.5); }
+function screen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function startQuiz(dir, list){ direction=dir; quiz=shuffle(list); index=0; correct=0; wrongWords=[]; screen('quiz'); nextWord(); }
+function nextWord(){
+  if(index >= quiz.length) return endQuiz();
+  const [fr,nl]=quiz[index];
+  document.getElementById('question').textContent = direction==='fr-nl' ? fr : nl;
+  document.getElementById('answer').textContent = direction==='fr-nl' ? nl : fr;
+  document.getElementById('answer').style.display='none';
+  document.getElementById('showBtn').style.display='block';
+  document.getElementById('judge').style.display='none';
+  document.getElementById('count').textContent = `${index+1}/${quiz.length}`;
+  document.getElementById('score').textContent = `Juist: ${correct}`;
+  document.getElementById('fill').style.width = `${(index/quiz.length)*100}%`;
+}
+function showAnswer(){ document.getElementById('answer').style.display='block'; document.getElementById('showBtn').style.display='none'; document.getElementById('judge').style.display='grid'; }
+function mark(ok){ if(ok) correct++; else wrongWords.push(quiz[index]); index++; nextWord(); }
+function endQuiz(){
+  document.getElementById('fill').style.width='100%'; screen('end');
+  document.getElementById('result').textContent = `Score: ${correct}/${quiz.length}`;
+  document.getElementById('retryWrong').style.display = wrongWords.length ? 'block' : 'none';
+  document.getElementById('wrongBox').innerHTML = wrongWords.length ? `<p class="muted">Foute woorden:</p><div class="list">${wrongWords.map(w=>`<div class="item"><b>${w[0]}</b><br>${w[1]}</div>`).join('')}</div>` : `<p class="muted">Geen foute woorden. Super!</p>`;
+}
+function goStart(){ screen('start'); }
+</script>
+</body>
+</html>
